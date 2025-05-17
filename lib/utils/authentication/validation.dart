@@ -9,6 +9,22 @@ class Validator {
     return null;
   }
 
+  static String? validateName(String? value) {
+    return (value == null || value.trim().isEmpty) ? 'Name is required' : null;
+  }
+
+  static String? validatePhone(String? value) {
+    return (value == null || value.trim().length < 10)
+        ? 'Valid phone number required'
+        : null;
+  }
+
+  static String? validateRequiredField(String? value) {
+    return (value == null || value.trim().isEmpty)
+        ? 'This field is required'
+        : null;
+  }
+
   // Validates if the email is in a proper format
   static String? validateEmail(String? email) {
     if (email == null || email.isEmpty) {

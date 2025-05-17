@@ -1,16 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../../utils/authentication/controllers/login/logincontroller.dart';
 import '../../utils/authentication/validation.dart';
 import '../../utils/constant/strings.dart';
+import '../../utils/controllers/login_controller.dart';
 import 'signupui.dart';
 
 class LoginUI extends StatelessWidget {
-  const LoginUI({super.key});
+  LoginUI({super.key});
+  final _formKey = GlobalKey<FormState>();
+  final LoginController controller = Get.put(LoginController());
 
   @override
   Widget build(BuildContext context) {
-    final controller = Get.put(LoginController());
     var width = MediaQuery.of(context).size.width;
     var height = MediaQuery.of(context).size.height;
     return Scaffold(
@@ -41,39 +42,24 @@ class LoginUI extends StatelessWidget {
               ],
             ),
             child: Form(
-              key: controller.loginFormKey,
+              key: _formKey,
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   //email
                   TextFormField(
-                    controller: controller.email,
                     validator: (value) => Validator.validateEmail(value),
                     decoration: const InputDecoration(labelText: ATexts.email),
-                    keyboardType: TextInputType.emailAddress,
+                    onChanged: (value) => controller.email.value = value,
                   ),
                   SizedBox(height: 20),
 
                   //password
-                  Obx(
-                    () => TextFormField(
-                      controller: controller.password,
-                      validator: (value) => Validator.validatePassword(value),
-                      decoration: InputDecoration(
-                        labelText: ATexts.password,
-                        suffixIcon: IconButton(
-                          icon: Icon(
-                            controller.hidePassword.value
-                                ? Icons.visibility
-                                : Icons.visibility_off,
-                          ),
-                          onPressed: () {
-                            controller.hidePassword.toggle();
-                          },
-                        ),
-                      ),
-                      obscureText: controller.hidePassword.value,
-                    ),
+                  TextFormField(
+                    validator: (value) => Validator.validatePassword(value),
+                    decoration: InputDecoration(labelText: ATexts.password),
+                    obscureText: true,
+                    onChanged: (value) => controller.password.value = value,
                   ),
 
                   SizedBox(height: 20),
@@ -96,20 +82,26 @@ class LoginUI extends StatelessWidget {
 
                   SizedBox(height: 30),
                   //login button
-                  SizedBox(
-                    width: width,
-                    height: 40,
-                    child: MaterialButton(
-                      onPressed: () {
-                        // Handle login action
-                      },
-                      color: const Color(0xFF4A90E2),
-
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(5),
-                      ),
-                      child: const Text(ATexts.signInTitle),
-                    ),
+                  Obx(
+                    () =>
+                        controller.isLoading.value
+                            ? CircularProgressIndicator()
+                            : SizedBox(
+                              width: width,
+                              height: 40,
+                              child: MaterialButton(
+                                onPressed: () {
+                                  if (_formKey.currentState!.validate()) {
+                                    controller.login();
+                                  }
+                                },
+                                color: const Color(0xFF4A90E2),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(5),
+                                ),
+                                child: const Text(ATexts.signInTitle),
+                              ),
+                            ),
                   ),
                   SizedBox(height: 20),
                   //sign up button
@@ -118,7 +110,7 @@ class LoginUI extends StatelessWidget {
                     children: [
                       const Text(ATexts.noAccount),
                       TextButton(
-                        onPressed: () => Get.to(SignupUI()),
+                        onPressed: () => Get.to(() => SignupUI()),
                         child: const Text(ATexts.signUpTitle),
                       ),
                     ],

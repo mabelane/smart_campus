@@ -1,23 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:get_storage/get_storage.dart';
+import 'services/sessions.dart';
+import 'view/bindings/initial_binding.dart';
 import 'view/login_signup/loginui.dart';
 
-void main() {
-  runApp(const MyApp());
-}
-
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
-  // This widget is the root of your application.
-  @override
-  Widget build(BuildContext context) {
-    return GetMaterialApp(
+void main() async {
+  await GetStorage.init();
+  Get.put<UserSession>(UserSession());
+  runApp(
+    GetMaterialApp(
+      debugShowCheckedModeBanner: false,
       title: 'Flutter Demo',
+      initialBinding: InitialBinding(),
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
       ),
-      home: const LoginUI(),
-    );
-  }
+      home: LoginUI(),
+    ),
+  );
 }

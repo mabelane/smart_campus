@@ -1,82 +1,135 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:smart_campus/utils/authentication/validation.dart';
-
-import '../../utils/authentication/controllers/signup/signup_controller.dart';
-import '../../utils/constant/strings.dart';
+import '../../utils/authentication/validation.dart';
+import '../../utils/controllers/signup_controller.dart';
 
 class SignupUI extends StatelessWidget {
+  SignupUI({super.key});
+
+  final _formKey = GlobalKey<FormState>();
+  final controller = Get.put(RegisterController());
+
   @override
   Widget build(BuildContext context) {
-    final controller = Get.put(SignupController());
     var width = MediaQuery.of(context).size.width;
-    var height = MediaQuery.of(context).size.height;
-    return Scaffold(
-      appBar: AppBar(title: Text(ATexts.signUpTitle)),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Form(
-          key: controller.signupFormKey,
-          child: Column(
-            children: [
-              TextFormField(
-                controller: controller.firstname,
-                decoration: InputDecoration(
-                  labelText: ATexts.firstName,
-                  border: OutlineInputBorder(),
-                ),
-                validator:
-                    (value) => Validator.validateEmptyText("First Name", value),
-              ),
-              SizedBox(height: 16),
-              TextFormField(
-                controller: controller.lastname,
-                decoration: InputDecoration(
-                  labelText: ATexts.lastName,
-                  border: OutlineInputBorder(),
-                ),
-                validator:
-                    (value) => Validator.validateEmptyText("Last Name", value),
-              ),
-              SizedBox(height: 16),
-              TextFormField(
-                controller: controller.email,
-                decoration: InputDecoration(
-                  labelText: ATexts.email,
-                  border: OutlineInputBorder(),
-                ),
-                validator: (value) => Validator.validateEmail(value),
-              ),
-              SizedBox(height: 16),
-              Obx(
-                () => TextFormField(
-                  obscureText: controller.hidePassword.value,
-                  controller: controller.password,
-                  validator: (value) => Validator.validatePassword(value),
-                  decoration: InputDecoration(
-                    labelText: ATexts.password,
-                    border: OutlineInputBorder(),
-                    suffixIcon: IconButton(
-                      icon: Icon(
-                        controller.hidePassword.value
-                            ? Icons.visibility_off
-                            : Icons.visibility,
-                      ),
-                      onPressed: () {
-                        controller.hidePassword.value =
-                            !controller.hidePassword.value;
-                      },
-                    ),
-                  ),
-                ),
-              ),
 
-              SizedBox(height: 24),
-              ElevatedButton(
-                onPressed: () => controller.signup(),
-                child: Text(ATexts.signUpTitle),
+    return Scaffold(
+      appBar: AppBar(title: const Text("Register")),
+      body: Center(
+        child: SingleChildScrollView(
+          child: Container(
+            width: width * 0.4,
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(16),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.05),
+                  blurRadius: 10,
+                ),
+              ],
+            ),
+            child: Form(
+              key: _formKey,
+              child: Column(
+                children: [
+                  /// Full Name
+                  TextFormField(
+                    decoration: const InputDecoration(labelText: "Full Name"),
+                    validator: Validator.validateName,
+                    onChanged: (value) => controller.name.value = value,
+                  ),
+                  const SizedBox(height: 16),
+
+                  /// Student Number (Optional)
+                  TextFormField(
+                    decoration: const InputDecoration(
+                      labelText: "Student Number (Optional)",
+                    ),
+                    onChanged: (val) => controller.studentNumber.value = val,
+                  ),
+                  const SizedBox(height: 16),
+
+                  /// Email
+                  TextFormField(
+                    decoration: const InputDecoration(labelText: "Email"),
+                    validator: Validator.validateEmail,
+                    onChanged: (value) => controller.email.value = value,
+                  ),
+                  const SizedBox(height: 16),
+
+                  /// Password
+                  TextFormField(
+                    decoration: const InputDecoration(labelText: "Password"),
+                    obscureText: true,
+                    validator: Validator.validatePassword,
+                    onChanged: (value) => controller.password.value = value,
+                  ),
+                  const SizedBox(height: 16),
+
+                  /// Phone Number
+                  TextFormField(
+                    decoration: const InputDecoration(
+                      labelText: "Phone Number",
+                    ),
+                    validator: Validator.validatePhone,
+                    onChanged: (value) => controller.phone.value = value,
+                  ),
+                  const SizedBox(height: 16),
+
+                  /// Department
+                  TextFormField(
+                    decoration: const InputDecoration(labelText: "Department"),
+                    validator: Validator.validateRequiredField,
+                    onChanged: (value) => controller.department.value = value,
+                  ),
+                  const SizedBox(height: 16),
+
+                  /// Role Dropdown
+                  DropdownButtonFormField<String>(
+                    decoration: const InputDecoration(labelText: "Role"),
+                    value: controller.role.value,
+                    items:
+                        ['Student', 'Lecturer', 'Admin'].map((role) {
+                          return DropdownMenuItem(
+                            value: role,
+                            child: Text(role),
+                          );
+                        }).toList(),
+                    onChanged: (val) {
+                      if (val != null) controller.role.value = val;
+                    },
+                  ),
+                  const SizedBox(height: 24),
+
+                  /// Submit Button
+                  Obx(
+                    () =>
+                        controller.isLoading.value
+                            ? const CircularProgressIndicator()
+                            : SizedBox(
+                              width: double.infinity,
+                              height: 48,
+                              child: ElevatedButton(
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: const Color(0xFF4A90E2),
+                                ),
+                                onPressed: () {
+                                  if (_formKey.currentState!.validate()) {
+                                    controller.registerUser();
+                                  }
+                                },
+                                child: const Text(
+                                  "Register",
+                                  style: TextStyle(fontSize: 16),
+                                ),
+                              ),
+                            ),
+                  ),
+                ],
               ),
-            ],
+            ),
           ),
         ),
       ),
